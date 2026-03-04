@@ -24,3 +24,6 @@ define('DB_NAME', $_ENV['DB_NAME'] ?? 'newsbot_writer');
 define('DB_USER', $_ENV['DB_USER'] ?? 'newsbot');
 define('DB_PASS', $_ENV['DB_PASS'] ?? '');
 define('DB_CHARSET', 'utf8mb4');
+
+// Application URL (used in HTTP headers, links, etc.)
+define('APP_URL', rtrim($_ENV['APP_URL'] ?? 'http://localhost', '/'));

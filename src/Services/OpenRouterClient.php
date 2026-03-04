@@ -77,7 +77,7 @@ class OpenRouterClient implements AiClientInterface
         $headers = [
             'Authorization: Bearer ' . $this->apiKey,
             'Content-Type: application/json',
-            'HTTP-Referer: https://writer.lexik.online',
+            'HTTP-Referer: ' . APP_URL,
             'X-Title: NewsBot Writer',
         ];
 
