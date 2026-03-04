@@ -1,20 +1,21 @@
 # NewsBot Writer - Nginx Configuration Example
-# Domain: writer.lexik.online
+# Replace YOUR_DOMAIN with your actual domain (e.g. writer.example.com)
 #
 # Usage:
-#   1. Copy this file to /etc/nginx/sites-available/writer.lexik.online.conf
-#   2. Create symlink: ln -s /etc/nginx/sites-available/writer.lexik.online.conf /etc/nginx/sites-enabled/
-#   3. Test config: nginx -t
-#   4. Reload Nginx: systemctl reload nginx
+#   1. Copy this file to /etc/nginx/sites-available/YOUR_DOMAIN.conf
+#   2. Replace all occurrences of YOUR_DOMAIN with your actual domain
+#   3. Create symlink: ln -s /etc/nginx/sites-available/YOUR_DOMAIN.conf /etc/nginx/sites-enabled/
+#   4. Test config: nginx -t
+#   5. Reload Nginx: systemctl reload nginx
 #
 # SSL Certificate (Let's Encrypt):
-#   sudo certbot --nginx -d writer.lexik.online
+#   sudo certbot --nginx -d YOUR_DOMAIN
 
 # HTTP to HTTPS redirect
 server {
     listen 80;
     listen [::]:80;
-    server_name writer.lexik.online;
+    server_name YOUR_DOMAIN;
 
     # Let's Encrypt challenge
     location /.well-known/acme-challenge/ {
@@ -30,15 +31,15 @@ server {
 server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
-    server_name writer.lexik.online;
+    server_name YOUR_DOMAIN;
 
     # Document root
     root /var/www/html/writer/web/public;
     index index.php;
 
     # SSL configuration (managed by Certbot)
-    ssl_certificate /etc/letsencrypt/live/writer.lexik.online/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/writer.lexik.online/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/YOUR_DOMAIN/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/YOUR_DOMAIN/privkey.pem;
     include /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 
