@@ -1,0 +1,98 @@
+# ============================================================================
+# NewsBot Crontab Configuration
+# ============================================================================
+# Copy the relevant lines to your crontab: crontab -e
+# Ensure paths match your installation directory.
+# ============================================================================
+
+# ============================================================================
+# MODE 1: Master Script (Recommended for most setups)
+# ============================================================================
+# Runs all pipeline steps sequentially: fetch → scrape → process → publish
+# Single process, prevents overlapping, simpler to manage.
+
+# Run pipeline every 10 minutes
+*/10 * * * * cd /var/www/html/writer && php cron/master.php >> /dev/null 2>&1
+
+# Cleanup job: expire stuck articles, clean old data, run alert checks
+0 * * * * cd /var/www/html/writer && php cron/cleanup.php >> /dev/null 2>&1
+
+
+# ============================================================================
+# MODE 2: Separate Steps (For fine-grained control)
+# ============================================================================
+# Each step runs independently with its own lock file.
+# Useful when steps have different timing requirements.
+# IMPORTANT: If using this mode, comment out the master.php line above.
+
+# Fetch new articles from feeds every 5 minutes
+# */5 * * * * cd /var/www/html/writer && php cron/fetch.php >> /dev/null 2>&1
+
+# Scrape full text every 5 minutes
+# */5 * * * * cd /var/www/html/writer && php cron/scrape.php >> /dev/null 2>&1
+
+# AI processing every 10 minutes (rate limited by budget)
+# */10 * * * * cd /var/www/html/writer && php cron/process.php >> /dev/null 2>&1
+
+# Publish to Telegram every 5 minutes
+# */5 * * * * cd /var/www/html/writer && php cron/publish.php >> /dev/null 2>&1
+
+# Publish to websites via REST API every 5 minutes
+# */5 * * * * cd /var/www/html/writer && php cron/web_publish.php >> /dev/null 2>&1
+
+# Cleanup every hour
+# 0 * * * * cd /var/www/html/writer && php cron/cleanup.php >> /dev/null 2>&1
+
+
+# ============================================================================
+# MODE 3: Parallel Processing by Channels (For high-volume setups)
+# ============================================================================
+# Run processing for different channel groups in parallel.
+# Each job uses channel-specific lock files to prevent conflicts.
+# Useful when you have many channels and want faster throughput.
+
+# Channel group 1 (high-priority channels)
+# */5 * * * * cd /var/www/html/writer && php cron/process.php --channel=1,2,3 >> /dev/null 2>&1
+
+# Channel group 2 (regular channels)
+# */15 * * * * cd /var/www/html/writer && php cron/process.php --channel=4,5,6 >> /dev/null 2>&1
+
+# Channel group 3 (low-priority channels)
+# */30 * * * * cd /var/www/html/writer && php cron/process.php --channel=7,8,9 >> /dev/null 2>&1
+
+
+# ============================================================================
+# Optional: Logging to file
+# ============================================================================
+# If you want to keep cron output for debugging:
+
+# */10 * * * * cd /var/www/html/writer && php cron/master.php >> /var/www/html/writer/logs/cron.log 2>&1
+
+# Rotate cron log daily (add to logrotate.d or run manually)
+# 0 0 * * * cd /var/www/html/writer && mv logs/cron.log logs/cron.log.1 2>/dev/null; touch logs/cron.log
+
+
+# ============================================================================
+# Notes
+# ============================================================================
+#
+# 1. Lock files are stored in /var/www/html/writer/locks/
+#    - master.lock, cleanup.lock, fetch.lock, scrape.lock, process.lock, publish.lock
+#    - Stale locks (>30 min with dead PID) are automatically cleaned
+#
+# 2. Application logs are in /var/www/html/writer/logs/app.log
+#    - JSON Lines format, rotated at 10MB
+#    - Kept for 5 rotations (app.log.1 through app.log.5)
+#
+# 3. Graceful shutdown:
+#    - Send SIGTERM to stop after current article
+#    - Send SIGINT (Ctrl+C) for immediate but safe stop
+#
+# 4. Recommended monitoring:
+#    - Set up alert_bot_id and alert_chat_id in Settings
+#    - Alerts are sent for: API errors, budget exceeded, stuck feeds, etc.
+#
+# 5. Testing:
+#    - Run manually first: php cron/master.php
+#    - Check logs: tail -f logs/app.log | jq
+#    - Verify lock files are created/removed properly

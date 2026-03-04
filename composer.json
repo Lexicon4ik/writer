@@ -1,0 +1,29 @@
+{
+    "name": "newsbot/newsbot",
+    "description": "News aggregator bot with AI processing and Telegram publishing",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": "^8.1",
+        "ext-pdo": "*",
+        "ext-curl": "*",
+        "ext-simplexml": "*",
+        "ext-dom": "*",
+        "ext-mbstring": "*",
+        "ext-iconv": "*",
+        "ext-json": "*",
+        "ext-openssl": "*",
+        "vlucas/phpdotenv": "^5.6"
+    },
+    "require-dev": {},
+    "autoload": {
+        "psr-4": {
+            "NewsBot\\Web\\Controllers\\": "web/Controllers/",
+            "NewsBot\\": "src/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "scripts": {}
+}

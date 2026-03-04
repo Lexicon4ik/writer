@@ -1,0 +1,200 @@
+/**
+ * NewsBot Writer Admin Styles
+ */
+
+/* Sidebar */
+.sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    width: 250px;
+    min-width: 250px;
+    overflow-y: auto;
+}
+
+.sidebar .nav-link {
+    border-radius: 0.375rem;
+    margin-bottom: 0.25rem;
+    transition: background-color 0.15s ease-in-out;
+}
+
+.sidebar .nav-link:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar .nav-link.active {
+    background: #0d6efd;
+}
+
+.sidebar .nav-link.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Main Content */
+.main-content {
+    min-height: 100vh;
+    background: #f8f9fa;
+}
+
+/* Cards */
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.card-header {
+    background: white;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* Tables */
+.table-responsive {
+    max-height: 3000px;
+    overflow-y: auto;
+}
+
+.table thead.sticky-top th {
+    background: white;
+    box-shadow: 0 1px 0 #dee2e6;
+}
+
+.table th {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #c2c4c6;
+}
+
+/* Status badges */
+.badge {
+    font-weight: 500;
+    font-size: 0.75rem;
+}
+
+.status-badge {
+    font-size: 0.75rem;
+}
+
+/* Text truncation */
+.truncate {
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Monospace for prompts and code */
+textarea.prompt,
+textarea.font-monospace,
+input.font-monospace {
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 13px;
+}
+
+textarea.prompt {
+    min-height: 200px;
+}
+
+/* Forms */
+.form-control:focus,
+.form-select:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.form-label {
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+/* Alert dismissible */
+.alert-dismissible {
+    padding-right: 3rem;
+}
+
+/* Progress bar */
+.progress {
+    border-radius: 0.375rem;
+}
+
+/* Dropdown */
+.dropdown-menu {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* Pagination */
+.pagination {
+    margin-bottom: 0;
+}
+
+.pagination .page-link {
+    color: #0d6efd;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    color: white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991.98px) {
+    .sidebar {
+        width: 200px !important;
+        min-width: 200px !important;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .d-flex>.sidebar {
+        display: none !important;
+    }
+
+    main {
+        width: 100% !important;
+    }
+
+    .truncate {
+        max-width: 150px;
+    }
+}
+
+/* Tooltip improvements */
+.tooltip {
+    font-size: 0.875rem;
+}
+
+/* Custom scrollbar for sidebar */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Hover effect for table rows */
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Card stats hover effect */
+.card.bg-primary:hover,
+.card.bg-success:hover,
+.card.bg-info:hover,
+.card.bg-secondary:hover,
+.card.bg-dark:hover,
+.card.bg-warning:hover {
+    transform: translateY(-2px);
+    transition: transform 0.15s ease-in-out;
+}
