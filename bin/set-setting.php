@@ -14,7 +14,7 @@ require_once __DIR__ . '/../config/app.php';
 use NewsBot\Core\{Database, Crypto, Settings};
 
 // Keys that are automatically encrypted when saving
-const ENCRYPTED_KEYS = ['openrouter_api_key', 'anthropic_api_key'];
+const ENCRYPTED_KEYS = ['openrouter_api_key', 'anthropic_api_key', 'gemini_api_key'];
 
 $action = $argv[1] ?? '--help';
 

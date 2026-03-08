@@ -9,6 +9,7 @@ use NewsBot\Models\Bot;
 use NewsBot\Services\AiClient;
 use NewsBot\Services\OpenRouterClient;
 use NewsBot\Services\AnthropicClient;
+use NewsBot\Services\GeminiClient;
 use NewsBot\Services\TelegramClient;
 
 /**
@@ -22,6 +23,7 @@ class SettingsController extends BaseController
     private const SENSITIVE_KEYS = [
         'openrouter_api_key',
         'anthropic_api_key',
+        'gemini_api_key',
     ];
 
     /**
@@ -32,9 +34,10 @@ class SettingsController extends BaseController
             'label' => 'AI Провайдер',
             'icon' => 'bi-robot',
             'settings' => [
-                'ai_provider' => ['type' => 'select', 'label' => 'Провайдер', 'options' => ['openrouter' => 'OpenRouter', 'anthropic' => 'Anthropic Direct']],
+                'ai_provider' => ['type' => 'select', 'label' => 'Провайдер', 'options' => ['openrouter' => 'OpenRouter', 'anthropic' => 'Anthropic Direct', 'gemini' => 'Google Gemini']],
                 'openrouter_api_key' => ['type' => 'password', 'label' => 'OpenRouter API Key', 'placeholder' => 'sk-or-...'],
                 'anthropic_api_key' => ['type' => 'password', 'label' => 'Anthropic API Key', 'placeholder' => 'sk-ant-...'],
+                'gemini_api_key' => ['type' => 'password', 'label' => 'Gemini API Key', 'placeholder' => 'AIza...'],
             ],
         ],
         'ai_models' => [
@@ -171,6 +174,8 @@ class SettingsController extends BaseController
             // Create client based on provider
             if ($provider === 'anthropic') {
                 $client = new AnthropicClient();
+            } elseif ($provider === 'gemini') {
+                $client = new GeminiClient();
             } else {
                 $client = new OpenRouterClient();
             }

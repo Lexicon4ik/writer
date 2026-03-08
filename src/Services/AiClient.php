@@ -22,6 +22,7 @@ class AiClient
 
         return match ($provider) {
             'anthropic' => new AnthropicClient(),
+            'gemini' => new GeminiClient(),
             default => new OpenRouterClient(),
         };
     }
@@ -36,10 +37,29 @@ class AiClient
     public static function getModel(string $operation, bool $useFallback = false): string
     {
         $key = $useFallback ? "model_{$operation}_fallback" : "model_{$operation}";
-        $default = match ($operation) {
-            'validate', 'deduplicate' => 'anthropic/claude-haiku-4-5-20251001',
-            default => 'anthropic/claude-sonnet-4-20250514',
-        };
+        
+        $provider = Settings::get('ai_provider', 'openrouter');
+        
+        // Return appropriate default models based on provider if not found in db
+        $providerConfigs = [
+            'anthropic' => [
+                'validate' => 'anthropic/claude-haiku-4-5-20251001',
+                'deduplicate' => 'anthropic/claude-haiku-4-5-20251001',
+                'default' => 'anthropic/claude-sonnet-4-20250514'
+            ],
+            'gemini' => [
+                'validate' => 'gemini-2.5-flash',
+                'deduplicate' => 'gemini-2.5-flash',
+                'default' => 'gemini-2.5-flash'
+            ],
+            'openrouter' => [
+                'validate' => 'anthropic/claude-haiku-4-5-20251001',
+                'deduplicate' => 'anthropic/claude-haiku-4-5-20251001',
+                'default' => 'anthropic/claude-sonnet-4-20250514'
+            ],
+        ];
+
+        $default = $providerConfigs[$provider][$operation] ?? current($providerConfigs[$provider]) ?? $providerConfigs['openrouter']['default'];
 
         return Settings::get($key, $default);
     }
