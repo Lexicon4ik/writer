@@ -14,6 +14,7 @@ $dotenv->safeLoad(); // Doesn't fail if .env doesn't exist (production may use s
 
 // Path constants
 define('ROOT_DIR', dirname(__DIR__));
+define('BASE_PATH', ROOT_DIR); // Alias for ROOT_DIR (used in Services/Image)
 define('LOG_DIR', ROOT_DIR . '/logs');
 define('LOCK_DIR', ROOT_DIR . '/locks');
 

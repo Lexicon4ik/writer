@@ -126,6 +126,9 @@ class ChannelController extends BaseController
         $maxPerDay = (int)($_POST['max_per_day'] ?? 20);
         $minImportanceScore = (int)($_POST['min_importance_score'] ?? 1);
         $useImages = isset($_POST['use_images']) ? 1 : 0;
+        $imageMode = in_array($_POST['image_mode'] ?? '', ['source', 'enhanced', 'generated', 'ai_only', 'library', 'pexels_ai', 'disabled'], true)
+            ? $_POST['image_mode']
+            : 'source';
         $manualReviewEnabled = isset($_POST['manual_review_enabled']) ? 1 : 0;
         $minValidationScore = (int)($_POST['min_validation_score'] ?? 6);
         $validationMode = $_POST['validation_mode'] ?? 'always';
@@ -179,6 +182,7 @@ class ChannelController extends BaseController
             'max_per_day' => $maxPerDay,
             'min_importance_score' => $minImportanceScore,
             'use_images' => $useImages,
+            'image_mode' => $imageMode,
             'manual_review_enabled' => $manualReviewEnabled,
             'min_validation_score' => $minValidationScore,
             'validation_mode' => $validationMode,

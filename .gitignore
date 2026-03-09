@@ -5,6 +5,9 @@
 logs/
 locks/
 
+# IMG
+storage/images/
+
 # Composer
 vendor/
 

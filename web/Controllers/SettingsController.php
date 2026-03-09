@@ -24,6 +24,7 @@ class SettingsController extends BaseController
         'openrouter_api_key',
         'anthropic_api_key',
         'gemini_api_key',
+        'pexels_api_key',
     ];
 
     /**
@@ -83,6 +84,19 @@ class SettingsController extends BaseController
             'settings' => [
                 'max_article_age_hours' => ['type' => 'number', 'label' => 'Макс. возраст статьи (часов)', 'default' => '24', 'min' => '1'],
                 'dedup_max_batches' => ['type' => 'number', 'label' => 'Макс. батчей дедупликации', 'default' => '10', 'min' => '1'],
+            ],
+        ],
+        'images' => [
+            'label' => 'Изображения',
+            'icon' => 'bi-image',
+            'settings' => [
+                'pexels_api_key' => ['type' => 'password', 'label' => 'Pexels API Key', 'placeholder' => 'Получить на pexels.com/api', 'help' => 'Бесплатный ключ: 200 запросов/час. Лицензия разрешает коммерческое использование.'],
+                'image_storage_path' => ['type' => 'text', 'label' => 'Путь хранения', 'default' => 'storage/images', 'help' => 'Относительный путь от корня проекта'],
+                'site_url' => ['type' => 'text', 'label' => 'URL сайта', 'placeholder' => 'https://writer.lexik.online', 'help' => 'Публичный URL для ссылок на изображения в REST API'],
+                'image_min_width' => ['type' => 'number', 'label' => 'Мин. ширина изображения (px)', 'default' => '600', 'min' => '100'],
+                'image_max_per_article' => ['type' => 'number', 'label' => 'Макс. изображений на статью', 'default' => '1', 'min' => '1', 'max' => '5'],
+                'image_ai_model' => ['type' => 'text', 'label' => 'Модель Google Imagen (AI-генерация)', 'default' => 'imagen-3.0-generate-002', 'help' => 'Используется с существующим Gemini API ключом. ~$0.04/изображение.'],
+                'image_vision_enabled' => ['type' => 'checkbox', 'label' => 'Vision-анализ изображений', 'help' => 'Тегирование, определение лиц и логотипов. Дополнительные расходы на AI.'],
             ],
         ],
     ];
@@ -146,7 +160,7 @@ class SettingsController extends BaseController
         }
 
         // Handle checkboxes (not sent when unchecked)
-        $checkboxKeys = ['model_fallback_enabled'];
+        $checkboxKeys = ['model_fallback_enabled', 'image_vision_enabled'];
         foreach ($checkboxKeys as $cbKey) {
             if (!isset($settings[$cbKey])) {
                 Settings::set($cbKey, '0');

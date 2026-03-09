@@ -2,9 +2,10 @@
 
 namespace NewsBot\Services;
 
-use NewsBot\Core\{Logger, Crypto};
+use NewsBot\Core\{Logger, Crypto, Database};
 use NewsBot\Models\{Article, ArticleVersion, Channel, Bot};
 use NewsBot\Helpers\TelegramFormatter;
+use NewsBot\Services\Image\ImageDownloader;
 
 /**
  * Article publisher for Telegram channels.
@@ -170,27 +171,17 @@ class Publisher
             return null;
         }
 
-        // Determine send method
-        $imageUrl = $this->shouldSendAsPhoto($article, $channel) ? ($article->image_url ?? null) : null;
+        // Determine send method: look up local image from article_version_images
+        $photo = $this->shouldSendAsPhoto($version, $channel)
+            ? $this->getVersionPhoto((int)$version->id)
+            : null;
 
         try {
-            if ($imageUrl) {
-                // Validate image
-                $imageCheck = ImageValidator::check($imageUrl);
-                if (!$imageCheck['valid']) {
-                    Logger::debug('Image skipped', [
-                        'url' => $imageUrl,
-                        'reason' => $imageCheck['reason'],
-                    ]);
-                    $imageUrl = null;
-                }
-            }
-
-            if ($imageUrl) {
+            if ($photo !== null) {
                 // Send as photo if caption fits
                 $visibleLength = mb_strlen(strip_tags($post));
                 if ($visibleLength <= TelegramClient::MAX_CAPTION_LENGTH) {
-                    $result = $this->telegram->sendPhoto($token, $chatId, $imageUrl, $post);
+                    $result = $this->telegram->sendPhoto($token, $chatId, $photo, $post);
                     Logger::info('Published with photo', [
                         'channel_id' => $channel->id,
                         'article_id' => $article->id,
@@ -199,9 +190,9 @@ class Publisher
                     return (int)($result['message_id'] ?? 0);
                 }
 
-                // Caption too long, truncate or send as text
+                // Caption too long — truncate
                 $truncatedCaption = $this->truncatePost($post, TelegramClient::MAX_CAPTION_LENGTH, $article->url);
-                $result = $this->telegram->sendPhoto($token, $chatId, $imageUrl, $truncatedCaption);
+                $result = $this->telegram->sendPhoto($token, $chatId, $photo, $truncatedCaption);
                 Logger::info('Published with photo (caption truncated)', [
                     'channel_id' => $channel->id,
                     'article_id' => $article->id,
@@ -366,26 +357,60 @@ class Publisher
     }
 
     /**
-     * Determine if article should be sent as photo.
-     *
-     * @param Article $article Article with potential image
-     * @param Channel $channel Channel settings
-     * @return bool True if should send as photo
+     * Determine if article version should be sent as photo.
+     * Checks channel settings and whether a local image is attached to the version.
      */
-    private function shouldSendAsPhoto(Article $article, Channel $channel): bool
+    private function shouldSendAsPhoto(ArticleVersion $version, Channel $channel): bool
     {
-        // Check channel setting
         if (!($channel->use_images ?? true)) {
             return false;
         }
 
-        // Check if article has image
-        $imageUrl = $article->image_url ?? $article->scraped_image_url ?? null;
-        if (empty($imageUrl)) {
+        $imageMode = $channel->image_mode ?? 'source';
+        if ($imageMode === 'disabled') {
             return false;
         }
 
-        return true;
+        // Check that a local image is actually attached
+        $row = Database::fetchOne(
+            "SELECT 1 FROM article_version_images WHERE article_version_id = ? LIMIT 1",
+            [(int)$version->id]
+        );
+
+        return $row !== null;
+    }
+
+    /**
+     * Get a CURLFile (local file) or null for the version's primary image.
+     * Falls back to null if file is missing on disk.
+     */
+    private function getVersionPhoto(int $versionId): ?\CURLFile
+    {
+        $row = Database::fetchOne(
+            "SELECT i.file_path, i.mime_type
+             FROM article_version_images avi
+             JOIN images i ON i.id = avi.image_id
+             WHERE avi.article_version_id = ? AND avi.position = 1
+             LIMIT 1",
+            [$versionId]
+        );
+
+        if (!$row || empty($row['file_path'])) {
+            return null;
+        }
+
+        $downloader = new ImageDownloader();
+        $absPath    = $downloader->getAbsolutePath($row['file_path']);
+
+        if (!file_exists($absPath)) {
+            Logger::warning('Publisher: image file missing on disk', [
+                'version_id' => $versionId,
+                'path'       => $absPath,
+            ]);
+            return null;
+        }
+
+        return new \CURLFile($absPath, $row['mime_type'] ?? 'image/jpeg');
     }
 
     /**

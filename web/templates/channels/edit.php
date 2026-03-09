@@ -217,12 +217,53 @@ $isEdit = $channel !== null;
                         </div>
                     </div>
 
-                    <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" id="use_images" name="use_images"
-                               <?= (!$isEdit || $channel->use_images) ? 'checked' : '' ?>>
-                        <label class="form-check-label" for="use_images">
-                            Use images
-                        </label>
+                    <!-- Image settings -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold"><i class="bi bi-image"></i> Изображения</label>
+                        <div class="row g-2 align-items-center">
+                            <div class="col-auto">
+                                <div class="form-check form-switch mt-1">
+                                    <input class="form-check-input" type="checkbox" id="use_images" name="use_images"
+                                           <?= (!$isEdit || $channel->use_images) ? 'checked' : '' ?>
+                                           onchange="document.getElementById('image_mode_wrap').style.display = this.checked ? '' : 'none'">
+                                    <label class="form-check-label" for="use_images">Использовать изображения</label>
+                                </div>
+                            </div>
+                            <div class="col" id="image_mode_wrap" style="<?= ($isEdit && !$channel->use_images) ? 'display:none' : '' ?>">
+                                <select class="form-select form-select-sm" name="image_mode" id="image_mode">
+                                    <option value="source"    <?= (!$isEdit || ($channel->image_mode ?? 'source') === 'source')    ? 'selected' : '' ?>>
+                                        source — из статьи (RSS / скрапинг)
+                                    </option>
+                                    <option value="library"   <?= ($isEdit && $channel->image_mode === 'library')   ? 'selected' : '' ?>>
+                                        library — из базы фото по категории
+                                    </option>
+                                    <option value="enhanced"  <?= ($isEdit && $channel->image_mode === 'enhanced')  ? 'selected' : '' ?>>
+                                        enhanced — источник → база → Pexels → AI
+                                    </option>
+                                    <option value="generated" <?= ($isEdit && $channel->image_mode === 'generated') ? 'selected' : '' ?>>
+                                        generated — база → Pexels → AI генерация
+                                    </option>
+                                    <option value="pexels_ai" <?= ($isEdit && $channel->image_mode === 'pexels_ai') ? 'selected' : '' ?>>
+                                        pexels_ai — Pexels → AI генерация
+                                    </option>
+                                    <option value="ai_only"   <?= ($isEdit && $channel->image_mode === 'ai_only')   ? 'selected' : '' ?>>
+                                        ai_only — только AI генерация (Imagen 3)
+                                    </option>
+                                    <option value="disabled"  <?= ($isEdit && $channel->image_mode === 'disabled')  ? 'selected' : '' ?>>
+                                        disabled — без изображений
+                                    </option>
+                                </select>
+                                <div class="form-text">
+                                    <strong>source</strong> — оригинал из RSS/скрапинга. Сохраняется в базу по категории.<br>
+                                    <strong>library</strong> — только из накопленной базы фото (по категории статьи). Без внешних запросов.<br>
+                                    <strong>enhanced</strong> — оригинал → база по категории → Pexels → AI генерация.<br>
+                                    <strong>generated</strong> — база по категории → Pexels → AI генерация (~$0.04/фото).<br>
+                                    <strong>pexels_ai</strong> — Pexels → AI генерация (без базы и источника).<br>
+                                    <strong>ai_only</strong> — всегда AI генерация, ~$0.04/фото (нужен Gemini API ключ).<br>
+                                    <strong>disabled</strong> — текстовые посты без изображений.
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-check mb-3">

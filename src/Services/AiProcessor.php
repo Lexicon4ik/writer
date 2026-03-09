@@ -151,6 +151,17 @@ class AiProcessor
 
         $version = $result['version'];
 
+        // Save image_meta if present (fill even on re-processing when it was NULL)
+        if (!empty($parsed['image_meta']) && is_array($parsed['image_meta'])) {
+            $imageMeta = json_encode($parsed['image_meta'], JSON_UNESCAPED_UNICODE);
+            Database::execute(
+                "UPDATE article_versions SET image_meta = ? WHERE id = ? AND image_meta IS NULL",
+                [$imageMeta, $version->id]
+            );
+            // Keep in-memory version consistent
+            $version->image_meta = $imageMeta;
+        }
+
         if ($result['created']) {
             Logger::info('Article processed successfully', [
                 'article_id' => $article->id,
@@ -320,7 +331,16 @@ For articles that should be published, return:
   "filter_tags": ["category1", "category2"],
   "importance_score": number from 1 to 10,
   "skip": false,
-  "skip_reason": ""
+  "skip_reason": "",
+  "image_meta": {
+    "event_title": "short English event name (e.g. 'Bangkok Protests 2026')",
+    "main_entity": "main subject (person, place, organization)",
+    "entity_type": "person|place|event|object|abstract",
+    "category": "politics|economics|technology|science|sports|culture|disaster|crime|other",
+    "scene_type": "portrait|group|outdoor_crowd|indoor|aerial|object|abstract",
+    "emotion": "neutral|positive|tense|dramatic|celebratory",
+    "image_queries": ["English search query 1", "English search query 2"]
+  }
 }
 JSON;
     }

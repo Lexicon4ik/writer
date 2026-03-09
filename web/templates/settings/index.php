@@ -103,6 +103,9 @@ $getMaskedSetting = function(string $key) use ($allSettings): string {
                                        value="<?= htmlspecialchars($getSetting($key, $config['default'] ?? '')) ?>"
                                        placeholder="<?= htmlspecialchars($config['placeholder'] ?? ($config['default'] ?? '')) ?>">
                             <?php endif; ?>
+                            <?php if (!empty($config['help'])): ?>
+                            <div class="form-text text-muted"><?= htmlspecialchars($config['help']) ?></div>
+                            <?php endif; ?>
                         </div>
                     </div>
                     <?php endforeach; ?>

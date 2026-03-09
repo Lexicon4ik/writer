@@ -81,18 +81,18 @@ class TelegramClient
     /**
      * Send a photo with caption to a chat.
      *
-     * @param string $token Bot token
-     * @param string $chatId Chat ID
-     * @param string $photoUrl Photo URL
-     * @param string $caption Caption text (will be formatted)
-     * @param string $parseMode Parse mode
+     * @param string           $token     Bot token
+     * @param string           $chatId    Chat ID
+     * @param string|\CURLFile $photo     Photo URL or local CURLFile for multipart upload
+     * @param string           $caption   Caption text (will be formatted)
+     * @param string           $parseMode Parse mode
      * @return array API response with message_id
      * @throws TelegramException on permanent error
      */
     public function sendPhoto(
         string $token,
         string $chatId,
-        string $photoUrl,
+        string|\CURLFile $photo,
         string $caption = '',
         string $parseMode = 'HTML'
     ): array {
@@ -106,8 +106,8 @@ class TelegramClient
         }
 
         $params = [
-            'chat_id' => $chatId,
-            'photo' => $photoUrl,
+            'chat_id'    => $chatId,
+            'photo'      => $photo,
             'parse_mode' => $parseMode,
         ];
 
@@ -294,18 +294,40 @@ class TelegramClient
                 throw new TelegramException('cURL init failed', 0);
             }
 
-            curl_setopt_array($ch, [
-                CURLOPT_POST => true,
-                CURLOPT_POSTFIELDS => json_encode($params),
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_CONNECTTIMEOUT => self::CONNECT_TIMEOUT,
-                CURLOPT_TIMEOUT => self::REQUEST_TIMEOUT,
-                CURLOPT_HTTPHEADER => [
-                    'Content-Type: application/json',
-                    'Accept: application/json',
-                ],
-                CURLOPT_SSL_VERIFYPEER => true,
-            ]);
+            // Detect if multipart upload is needed (CURLFile in params)
+            $hasFile = false;
+            foreach ($params as $v) {
+                if ($v instanceof \CURLFile) {
+                    $hasFile = true;
+                    break;
+                }
+            }
+
+            if ($hasFile) {
+                // Multipart/form-data — pass array directly, cURL sets the content-type
+                curl_setopt_array($ch, [
+                    CURLOPT_POST           => true,
+                    CURLOPT_POSTFIELDS     => $params,
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_CONNECTTIMEOUT => self::CONNECT_TIMEOUT,
+                    CURLOPT_TIMEOUT        => self::REQUEST_TIMEOUT,
+                    CURLOPT_HTTPHEADER     => ['Accept: application/json'],
+                    CURLOPT_SSL_VERIFYPEER => true,
+                ]);
+            } else {
+                curl_setopt_array($ch, [
+                    CURLOPT_POST           => true,
+                    CURLOPT_POSTFIELDS     => json_encode($params),
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_CONNECTTIMEOUT => self::CONNECT_TIMEOUT,
+                    CURLOPT_TIMEOUT        => self::REQUEST_TIMEOUT,
+                    CURLOPT_HTTPHEADER     => [
+                        'Content-Type: application/json',
+                        'Accept: application/json',
+                    ],
+                    CURLOPT_SSL_VERIFYPEER => true,
+                ]);
+            }
 
             $response = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);

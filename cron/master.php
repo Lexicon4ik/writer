@@ -56,6 +56,16 @@ try {
     $processStep->run();
     Logger::debug('Process step completed');
 
+    // Step 3.5: Image selection
+    Settings::clearCache();
+    if (ShutdownHandler::shouldShutdown()) {
+        Logger::info('Shutdown before image');
+        goto done;
+    }
+    $imageStep = new \NewsBot\Pipeline\ImageStep();
+    $imageStep->run();
+    Logger::debug('Image step completed');
+
     // Step 4: Publish to Telegram
     Settings::clearCache();
     if (ShutdownHandler::shouldShutdown()) {

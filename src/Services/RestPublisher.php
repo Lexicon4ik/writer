@@ -2,7 +2,7 @@
 
 namespace NewsBot\Services;
 
-use NewsBot\Core\Logger;
+use NewsBot\Core\{Logger, Database, Settings};
 use NewsBot\Models\{Article, ArticleVersion, WebsiteEndpoint};
 
 /**
@@ -204,12 +204,37 @@ class RestPublisher
             'body_plain'       => strip_tags($body),
             'hashtags'         => $hashtags,
             'url'              => $article->url ?? '',
-            'image_url'        => $article->scraped_image_url ?? $article->rss_image_url ?? '',
+            'image_url'        => $this->getVersionImageUrl((int)$version->id, $article),
             'date'             => $date,
             'date_iso'         => $dateIso,
             'source_name'      => $article->getSource()?->name ?? '',
             'importance_score' => (int)($version->importance_score ?? 0),
         ];
+    }
+
+    /**
+     * Return a public image URL for the article version.
+     * Prefers a locally stored image from article_version_images.
+     * Falls back to the original scraped/RSS URL if no local image exists.
+     */
+    private function getVersionImageUrl(int $versionId, Article $article): string
+    {
+        $row = Database::fetchOne(
+            "SELECT i.file_path
+             FROM article_version_images avi
+             JOIN images i ON i.id = avi.image_id
+             WHERE avi.article_version_id = ? AND avi.position = 1
+             LIMIT 1",
+            [$versionId]
+        );
+
+        if ($row && !empty($row['file_path'])) {
+            $siteUrl = rtrim(Settings::get('site_url', ''), '/');
+            return $siteUrl . '/' . ltrim($row['file_path'], '/');
+        }
+
+        // Fallback to original URL
+        return $article->scraped_image_url ?? $article->rss_image_url ?? '';
     }
 
     /**
