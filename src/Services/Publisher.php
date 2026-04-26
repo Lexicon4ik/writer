@@ -190,17 +190,17 @@ class Publisher
                     return (int)($result['message_id'] ?? 0);
                 }
 
-                // Caption too long — truncate
-                $truncatedCaption = $this->truncatePost($post, TelegramClient::MAX_CAPTION_LENGTH, $article->url);
-                $result = $this->telegram->sendPhoto($token, $chatId, $photo, $truncatedCaption);
-                Logger::info('Published with photo (caption truncated)', [
+                // Caption too long — send photo without caption, then full text separately
+                $this->telegram->sendPhoto($token, $chatId, $photo, '');
+                Logger::info('Published photo without caption (text too long)', [
                     'channel_id' => $channel->id,
                     'article_id' => $article->id,
                 ]);
-                return (int)($result['message_id'] ?? 0);
+
+                // Fall through to send text as separate message below
             }
 
-            // Send as text message
+            // Send as text message (full text, no truncation unless exceeds 4096)
             $visibleLength = mb_strlen(strip_tags($post));
             if ($visibleLength > TelegramClient::MAX_TEXT_LENGTH) {
                 $post = $this->truncatePost($post, TelegramClient::MAX_TEXT_LENGTH, $article->url);

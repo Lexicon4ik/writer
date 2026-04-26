@@ -92,7 +92,7 @@ class SettingsController extends BaseController
             'settings' => [
                 'pexels_api_key' => ['type' => 'password', 'label' => 'Pexels API Key', 'placeholder' => 'Получить на pexels.com/api', 'help' => 'Бесплатный ключ: 200 запросов/час. Лицензия разрешает коммерческое использование.'],
                 'image_storage_path' => ['type' => 'text', 'label' => 'Путь хранения', 'default' => 'storage/images', 'help' => 'Относительный путь от корня проекта'],
-                'site_url' => ['type' => 'text', 'label' => 'URL сайта', 'placeholder' => 'https://writer.lexik.online', 'help' => 'Публичный URL для ссылок на изображения в REST API'],
+                'site_url' => ['type' => 'text', 'label' => 'URL сайта', 'placeholder' => 'https://writer.site.com', 'help' => 'Публичный URL для ссылок на изображения в REST API'],
                 'image_min_width' => ['type' => 'number', 'label' => 'Мин. ширина изображения (px)', 'default' => '600', 'min' => '100'],
                 'image_max_per_article' => ['type' => 'number', 'label' => 'Макс. изображений на статью', 'default' => '1', 'min' => '1', 'max' => '5'],
                 'image_ai_model' => ['type' => 'text', 'label' => 'Модель Google Imagen (AI-генерация)', 'default' => 'imagen-3.0-generate-002', 'help' => 'Используется с существующим Gemini API ключом. ~$0.04/изображение.'],
